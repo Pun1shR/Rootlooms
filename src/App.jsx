@@ -15,6 +15,11 @@ function App() {
 
   useEffect(() => {
     async function fetchData() {
+      if (!supabase) {
+        console.error("Supabase is not initialized. Please configure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in Vercel.");
+        setLoading(false);
+        return;
+      }
       try {
         const [categoriesResponse, sareesResponse] = await Promise.all([
           supabase.from('categories').select('*').order('name'),
