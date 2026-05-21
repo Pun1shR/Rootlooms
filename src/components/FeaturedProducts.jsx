@@ -1,6 +1,6 @@
 const FeaturedProducts = ({ categories, sarees }) => {
   return (
-    <div className="bg-surface" style={{ backgroundColor: 'var(--color-surface)' }}>
+    <div id="collections-section" className="bg-surface" style={{ backgroundColor: 'var(--color-surface)' }}>
       {categories.map(cat => {
         // Get all sarees for this category
         const categorySarees = sarees.filter(s => s.category_id === cat.id);
@@ -39,46 +39,49 @@ const FeaturedProducts = ({ categories, sarees }) => {
                     scrollbarWidth: 'none'    /* Firefox */
                   }}
                 >
-                  {paddedSarees.map(prod => (
-                    <div 
-                      key={prod.id} 
-                      className="product-card"
-                      style={{ 
-                        flex: '0 0 180px', /* Ensure it stays exactly 180px wide and doesn't shrink */
-                        textAlign: 'left',  /* Left-align text for elegant mobile catalog feel */
-                        filter: prod.isDummy ? 'grayscale(100%) opacity(70%)' : 'none'
-                      }}
-                    >
-                      <div className="product-image-container" style={{ position: 'relative', marginBottom: '0.8rem' }}>
-                        <img src={prod.image_url} alt={prod.name} className="product-image" />
-                        {prod.isDummy && (
-                          <div style={{
-                            position: 'absolute',
-                            top: '50%',
-                            left: '50%',
-                            transform: 'translate(-50%, -50%)',
-                            backgroundColor: 'rgba(0,0,0,0.6)',
-                            color: 'white',
-                            padding: '6px 12px',
-                            fontWeight: 'bold',
-                            fontSize: '0.8rem',
-                            border: '1px solid white',
-                            letterSpacing: '1px',
-                            zIndex: 10,
-                            whiteSpace: 'nowrap'
-                          }}>
-                            SOLD OUT
-                          </div>
-                        )}
+                  {paddedSarees.map(prod => {
+                    const isSoldOut = prod.isDummy || Number(prod.stock) === 0;
+                    return (
+                      <div 
+                        key={prod.id} 
+                        className="product-card"
+                        style={{ 
+                          flex: '0 0 180px', /* Ensure it stays exactly 180px wide and doesn't shrink */
+                          textAlign: 'left',  /* Left-align text for elegant mobile catalog feel */
+                          filter: isSoldOut ? 'grayscale(100%) opacity(70%)' : 'none'
+                        }}
+                      >
+                        <div className="product-image-container" style={{ position: 'relative', marginBottom: '0.8rem' }}>
+                          <img src={prod.image_url} alt={prod.name} className="product-image" />
+                          {isSoldOut && (
+                            <div style={{
+                              position: 'absolute',
+                              top: '50%',
+                              left: '50%',
+                              transform: 'translate(-50%, -50%)',
+                              backgroundColor: 'rgba(0,0,0,0.6)',
+                              color: 'white',
+                              padding: '6px 12px',
+                              fontWeight: 'bold',
+                              fontSize: '0.8rem',
+                              border: '1px solid white',
+                              letterSpacing: '1px',
+                              zIndex: 10,
+                              whiteSpace: 'nowrap'
+                            }}>
+                              SOLD OUT
+                            </div>
+                          )}
+                        </div>
+                        <h4 className="product-title" style={{ fontSize: '0.95rem', margin: '0 0 0.3rem 0', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                          {prod.name}
+                        </h4>
+                        <p className="product-price" style={{ margin: 0, fontSize: '0.9rem', color: 'var(--color-text-light)' }}>
+                          {prod.price !== '-' ? `₹ ${new Intl.NumberFormat('en-IN').format(Number(prod.price))}` : '-'}
+                        </p>
                       </div>
-                      <h4 className="product-title" style={{ fontSize: '0.95rem', margin: '0 0 0.3rem 0', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-                        {prod.name}
-                      </h4>
-                      <p className="product-price" style={{ margin: 0, fontSize: '0.9rem', color: 'var(--color-text-light)' }}>
-                        {prod.price !== '-' ? `₹ ${new Intl.NumberFormat('en-IN').format(Number(prod.price))}` : '-'}
-                      </p>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
                 
                 {/* Horizontal scroll right-side fade indicator blending with surface background */}

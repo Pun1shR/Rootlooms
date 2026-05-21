@@ -15,15 +15,24 @@ const Header = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const handleNavClick = (e, targetId) => {
+    e.preventDefault();
+    const element = document.getElementById(targetId);
+    if (element) {
+      // Smooth scroll to the target section
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <header className={`header ${scrolled ? 'scrolled' : ''}`}>
       <div className="container">
         <a href="/" className="logo-text">ROOT LOOMS</a>
         <nav className="nav-links">
-          <a href="#">Shop</a>
-          <a href="#">Collections</a>
-          <a href="#">About Us</a>
-          <a href="#">Contact</a>
+          <a href="#categories-section" onClick={(e) => handleNavClick(e, 'categories-section')}>Shop</a>
+          <a href="#collections-section" onClick={(e) => handleNavClick(e, 'collections-section')}>Collections</a>
+          <a href="#about-section" onClick={(e) => handleNavClick(e, 'about-section')}>About Us</a>
+          <a href="#contact-section" onClick={(e) => handleNavClick(e, 'contact-section')}>Contact</a>
         </nav>
       </div>
     </header>

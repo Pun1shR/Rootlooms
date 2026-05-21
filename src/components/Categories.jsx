@@ -8,7 +8,7 @@ const Categories = ({ categories, sarees }) => {
   };
 
   return (
-    <section className="py-4">
+    <section id="categories-section" className="py-4">
       <div className="container">
         <div className="section-header">
           <h2 className="section-title">Shop by Category</h2>

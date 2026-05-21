@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import Categories from './components/Categories';
 import FeaturedProducts from './components/FeaturedProducts';
+import About from './components/About';
 import Footer from './components/Footer';
 import { supabase } from './supabaseClient';
 import './App.css';
@@ -48,6 +49,7 @@ function App() {
           <>
             <Categories categories={categories} sarees={sarees} />
             <FeaturedProducts categories={categories} sarees={sarees} />
+            <About />
           </>
         )}
       </main>
