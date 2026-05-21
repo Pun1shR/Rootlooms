@@ -43,6 +43,28 @@ function App() {
 
   return (
     <div className="app-container">
+      {!supabase && (
+        <div style={{
+          backgroundColor: '#ffebee',
+          color: '#c62828',
+          padding: '12px 20px',
+          textAlign: 'center',
+          fontSize: '0.9rem',
+          fontWeight: '600',
+          borderBottom: '1px solid #ffcdd2',
+          position: 'sticky',
+          top: 0,
+          zIndex: 9999,
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: '8px',
+          boxShadow: '0 2px 5px rgba(0,0,0,0.05)'
+        }}>
+          <span>⚠️</span> 
+          <span><strong>Supabase Keys Missing:</strong> Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in Vercel, then <strong>Redeploy</strong> your project.</span>
+        </div>
+      )}
       <Header />
       <main>
         <Hero />
