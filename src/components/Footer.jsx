@@ -23,10 +23,6 @@ const Footer = () => {
             <h4>Get in Touch</h4>
             <ul style={{ color: '#ccc', fontSize: '0.9rem' }}>
               <li style={{ marginBottom: '0.8rem' }}>
-                <strong>Address:</strong> <br />
-                Silver Gracia, Ravet, Pune - 412101
-              </li>
-              <li style={{ marginBottom: '0.8rem' }}>
                 <strong>WhatsApp:</strong> <br />
                 <a href="https://wa.me/919890509663" target="_blank" rel="noreferrer">+91 9890509663</a>
               </li>
