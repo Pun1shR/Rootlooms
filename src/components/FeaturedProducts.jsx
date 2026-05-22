@@ -1,7 +1,7 @@
 const FeaturedProducts = ({ categories, sarees }) => {
   return (
     <div id="collections-section" className="bg-surface" style={{ backgroundColor: 'var(--color-surface)' }}>
-      {categories.map(cat => {
+      {categories.map((cat, index) => {
         // Get all sarees for this category
         const categorySarees = sarees.filter(s => s.category_id === cat.id);
         
@@ -18,7 +18,8 @@ const FeaturedProducts = ({ categories, sarees }) => {
         }
 
         return (
-          <section key={cat.id} id={`category-${cat.id}`} className="py-4" style={{ borderTop: '1px solid #e7e0d7', position: 'relative' }}>
+          <section key={cat.id} id={`category-${cat.id}`} style={{ position: 'relative', padding: '1.5rem 0' }}>
+            {index > 0 && <div className="catalog-divider" />}
             <div className="container">
               <div className="section-header" style={{ marginBottom: '2rem' }}>
                 <h2 className="section-title">{cat.name} Collection</h2>
