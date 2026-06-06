@@ -1,4 +1,8 @@
+import { useCart } from '../context/CartContext';
+
 const FeaturedProducts = ({ categories, sarees }) => {
+  const { addToCart } = useCart();
+
   return (
     <div id="collections-section" className="bg-surface" style={{ backgroundColor: 'var(--color-surface)' }}>
       {categories.map((cat, index) => {
@@ -49,7 +53,9 @@ const FeaturedProducts = ({ categories, sarees }) => {
                         style={{ 
                           flex: '0 0 180px', /* Ensure it stays exactly 180px wide and doesn't shrink */
                           textAlign: 'left',  /* Left-align text for elegant mobile catalog feel */
-                          filter: isSoldOut ? 'grayscale(100%) opacity(70%)' : 'none'
+                          filter: isSoldOut ? 'grayscale(100%) opacity(70%)' : 'none',
+                          display: 'flex',
+                          flexDirection: 'column'
                         }}
                       >
                         <div className="product-image-container" style={{ position: 'relative', marginBottom: '0.8rem' }}>
@@ -77,9 +83,40 @@ const FeaturedProducts = ({ categories, sarees }) => {
                         <h4 className="product-title" style={{ fontSize: '0.95rem', margin: '0 0 0.3rem 0', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
                           {prod.name}
                         </h4>
-                        <p className="product-price" style={{ margin: 0, fontSize: '0.9rem', color: 'var(--color-text-light)' }}>
+                        <p className="product-price" style={{ margin: '0 0 0.8rem 0', fontSize: '0.9rem', color: 'var(--color-text-light)' }}>
                           {prod.price !== '-' ? `₹ ${new Intl.NumberFormat('en-IN').format(Number(prod.price))}` : '-'}
                         </p>
+                        
+                        {!isSoldOut && (
+                          <button 
+                            onClick={() => addToCart(prod)}
+                            style={{
+                              marginTop: 'auto',
+                              width: '100%',
+                              padding: '8px',
+                              backgroundColor: 'var(--color-surface)',
+                              border: '1px solid var(--color-border)',
+                              color: 'var(--color-text)',
+                              cursor: 'pointer',
+                              fontSize: '0.8rem',
+                              textTransform: 'uppercase',
+                              letterSpacing: '1px',
+                              transition: 'all 0.2s ease',
+                            }}
+                            onMouseOver={(e) => {
+                              e.target.style.backgroundColor = 'var(--color-primary)';
+                              e.target.style.color = 'white';
+                              e.target.style.borderColor = 'var(--color-primary)';
+                            }}
+                            onMouseOut={(e) => {
+                              e.target.style.backgroundColor = 'var(--color-surface)';
+                              e.target.style.color = 'var(--color-text)';
+                              e.target.style.borderColor = 'var(--color-border)';
+                            }}
+                          >
+                            Add to Cart
+                          </button>
+                        )}
                       </div>
                     );
                   })}

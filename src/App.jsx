@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import Header from './components/Header';
-import Hero from './components/Hero';
-import Categories from './components/Categories';
-import FeaturedProducts from './components/FeaturedProducts';
-import About from './components/About';
-import Footer from './components/Footer';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import { CartProvider } from './context/CartContext';
+import LoginModal from './components/LoginModal';
+import CartDrawer from './components/CartDrawer';
+import Storefront from './pages/Storefront';
+import AdminPanel from './pages/AdminPanel';
 import { supabase } from './supabaseClient';
 import './App.css';
 
@@ -12,11 +13,12 @@ function App() {
   const [categories, setCategories] = useState([]);
   const [sarees, setSarees] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
       if (!supabase) {
-        console.error("Supabase is not initialized. Please configure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in Vercel.");
+        console.error("Supabase is not initialized.");
         setLoading(false);
         return;
       }
@@ -32,56 +34,78 @@ function App() {
         setCategories(categoriesResponse.data || []);
         setSarees(sareesResponse.data || []);
       } catch (error) {
-        console.error("Error fetching data from Supabase:", error);
+        console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
       }
     }
 
     fetchData();
+
+    // Set up Realtime Sync for Sarees
+    if (supabase) {
+      const channel = supabase
+        .channel('public:sarees')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'sarees' }, (payload) => {
+          // Re-fetch sarees when any change occurs to ensure perfect sync
+          // We could mutate state directly, but re-fetching is safer and simpler for small catalogs
+          supabase.from('sarees').select('*').order('created_at', { ascending: false })
+            .then(res => {
+              if (res.data) setSarees(res.data);
+            });
+        })
+        .subscribe();
+
+      const catChannel = supabase
+        .channel('public:categories')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'categories' }, () => {
+           supabase.from('categories').select('*').order('name')
+            .then(res => {
+              if (res.data) setCategories(res.data);
+            });
+        })
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+        supabase.removeChannel(catChannel);
+      };
+    }
   }, []);
 
   return (
-    <div className="app-container">
-      {!supabase && (
-        <div style={{
-          backgroundColor: '#ffebee',
-          color: '#c62828',
-          padding: '12px 20px',
-          textAlign: 'center',
-          fontSize: '0.9rem',
-          fontWeight: '600',
-          borderBottom: '1px solid #ffcdd2',
-          position: 'sticky',
-          top: 0,
-          zIndex: 9999,
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          gap: '8px',
-          boxShadow: '0 2px 5px rgba(0,0,0,0.05)'
-        }}>
-          <span>⚠️</span> 
-          <span><strong>Supabase Keys Missing:</strong> Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in Vercel, then <strong>Redeploy</strong> your project.</span>
-        </div>
-      )}
-      <Header />
-      <main>
-        <Hero />
-        {loading ? (
-          <div className="py-4 text-center" style={{ padding: '40px 0', fontSize: '1.2rem', color: '#666' }}>
-            Loading live collection...
+    <AuthProvider>
+      <CartProvider>
+        <BrowserRouter>
+          <div className="app-container">
+            {!supabase && (
+              <div style={{
+                backgroundColor: '#ffebee', color: '#c62828', padding: '12px 20px', textAlign: 'center',
+                fontSize: '0.9rem', fontWeight: '600', position: 'sticky', top: 0, zIndex: 9999
+              }}>
+                ⚠️ <strong>Supabase Keys Missing</strong>
+              </div>
+            )}
+            
+            <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} />
+            <CartDrawer onLoginClick={() => setIsLoginModalOpen(true)} />
+            
+            <Routes>
+              <Route path="/" element={
+                <Storefront 
+                  categories={categories} 
+                  sarees={sarees} 
+                  loading={loading} 
+                  setIsLoginModalOpen={setIsLoginModalOpen} 
+                />
+              } />
+              <Route path="/admin" element={<AdminPanel categories={categories} sarees={sarees} />} />
+            </Routes>
+            
           </div>
-        ) : (
-          <>
-            <Categories categories={categories} sarees={sarees} />
-            <FeaturedProducts categories={categories} sarees={sarees} />
-            <About />
-          </>
-        )}
-      </main>
-      <Footer />
-    </div>
+        </BrowserRouter>
+      </CartProvider>
+    </AuthProvider>
   );
 }
 
