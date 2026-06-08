@@ -5,7 +5,7 @@ const CartContext = createContext();
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const shippingCost = 100; // Flat IndiaPost shipping
+  const shippingCost = cartItems.length > 0 && cartItems.every(item => item.isTest) ? 0 : 100;
 
   // Load from local storage on mount
   useEffect(() => {

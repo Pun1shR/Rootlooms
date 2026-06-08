@@ -31,8 +31,26 @@ function App() {
         if (categoriesResponse.error) throw categoriesResponse.error;
         if (sareesResponse.error) throw sareesResponse.error;
 
-        setCategories(categoriesResponse.data || []);
-        setSarees(sareesResponse.data || []);
+        const cats = categoriesResponse.data || [];
+        setCategories(cats);
+
+        let fetchedSarees = sareesResponse.data || [];
+        if (cats.length > 0) {
+          fetchedSarees = [
+            {
+              id: 'test-razorpay-item-1',
+              name: 'Razorpay Test Item (₹1)',
+              price: 1,
+              stock: 999,
+              category_id: cats[0].id,
+              image_url: 'https://placehold.co/400x500/eaeaea/5a4738?text=Razorpay+Test+₹1',
+              isTest: true,
+              created_at: new Date().toISOString()
+            },
+            ...fetchedSarees
+          ];
+        }
+        setSarees(fetchedSarees);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -47,11 +65,31 @@ function App() {
       const channel = supabase
         .channel('public:sarees')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'sarees' }, (payload) => {
-          // Re-fetch sarees when any change occurs to ensure perfect sync
-          // We could mutate state directly, but re-fetching is safer and simpler for small catalogs
           supabase.from('sarees').select('*').order('created_at', { ascending: false })
             .then(res => {
-              if (res.data) setSarees(res.data);
+              if (res.data) {
+                let fetchedSarees = res.data;
+                setCategories(currentCats => {
+                  if (currentCats.length > 0) {
+                    setSarees([
+                      {
+                        id: 'test-razorpay-item-1',
+                        name: 'Razorpay Test Item (₹1)',
+                        price: 1,
+                        stock: 999,
+                        category_id: currentCats[0].id,
+                        image_url: 'https://placehold.co/400x500/eaeaea/5a4738?text=Razorpay+Test+₹1',
+                        isTest: true,
+                        created_at: new Date().toISOString()
+                      },
+                      ...fetchedSarees
+                    ]);
+                  } else {
+                    setSarees(fetchedSarees);
+                  }
+                  return currentCats;
+                });
+              }
             });
         })
         .subscribe();
@@ -61,7 +99,32 @@ function App() {
         .on('postgres_changes', { event: '*', schema: 'public', table: 'categories' }, () => {
            supabase.from('categories').select('*').order('name')
             .then(res => {
-              if (res.data) setCategories(res.data);
+              if (res.data) {
+                setCategories(res.data);
+                supabase.from('sarees').select('*').order('created_at', { ascending: false })
+                  .then(sareeRes => {
+                    if (sareeRes.data) {
+                      const cats = res.data;
+                      if (cats.length > 0) {
+                        setSarees([
+                          {
+                            id: 'test-razorpay-item-1',
+                            name: 'Razorpay Test Item (₹1)',
+                            price: 1,
+                            stock: 999,
+                            category_id: cats[0].id,
+                            image_url: 'https://placehold.co/400x500/eaeaea/5a4738?text=Razorpay+Test+₹1',
+                            isTest: true,
+                            created_at: new Date().toISOString()
+                          },
+                          ...sareeRes.data
+                        ]);
+                      } else {
+                        setSarees(sareeRes.data);
+                      }
+                    }
+                  });
+              }
             });
         })
         .subscribe();

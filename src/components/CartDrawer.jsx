@@ -23,6 +23,18 @@ const CartDrawer = ({ onLoginClick }) => {
         body: JSON.stringify({ amount: total })
       });
       
+      if (!res.ok) {
+        const text = await res.text();
+        let errorMessage = 'Failed to create order';
+        try {
+          const json = JSON.parse(text);
+          if (json.error) errorMessage = json.error;
+        } catch(e) {
+          errorMessage = `Backend Error: ${res.status} ${res.statusText}. Please ensure the API server is running.`;
+        }
+        throw new Error(errorMessage);
+      }
+
       const order = await res.json();
       if (order.error) throw new Error(order.error);
 
@@ -71,6 +83,11 @@ const CartDrawer = ({ onLoginClick }) => {
         },
         theme: {
           color: '#5A4738'
+        },
+        modal: {
+          ondismiss: function() {
+            console.log('Payment modal dismissed by user');
+          }
         }
       };
 

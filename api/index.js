@@ -47,8 +47,13 @@ app.post('/api/create-order', async (req, res) => {
       return res.status(500).json({ error: 'Razorpay keys not configured' });
     }
 
+    const amountInPaise = amount * 100;
+    if (amountInPaise < 100) {
+      return res.status(400).json({ error: 'Amount must be at least 1 INR (100 paise)' });
+    }
+
     const options = {
-      amount: amount * 100, // Razorpay works in paise (amount * 100)
+      amount: amountInPaise, // Razorpay works in paise (amount * 100)
       currency: 'INR',
       receipt: receipt || `receipt_${Date.now()}`,
     };
@@ -57,6 +62,9 @@ app.post('/api/create-order', async (req, res) => {
     res.json(order);
   } catch (error) {
     console.error("Error creating order:", error);
+    if (error.statusCode === 401) {
+      return res.status(401).json({ error: 'Razorpay Authentication Failed' });
+    }
     res.status(500).json({ error: error.message || 'Internal Server Error' });
   }
 });
@@ -70,6 +78,10 @@ app.post('/api/verify-payment', async (req, res) => {
       razorpay_signature, 
       orderDetails 
     } = req.body;
+
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+      return res.status(400).json({ error: 'Missing required Razorpay fields' });
+    }
 
     // Verify signature
     const secret = process.env.RAZORPAY_KEY_SECRET;
